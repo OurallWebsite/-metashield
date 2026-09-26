@@ -1,0 +1,1404 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Private File Metadata Scrubber — Remove EXIF, GPS, PDF & DOCX Metadata Without Uploading</title>
+  <meta name="description" content="Remove hidden EXIF, GPS, camera, author, company, PDF and DOCX metadata in your browser. Supported files are processed locally with no upload by default, plus a before/after audit report." />
+  <link rel="canonical" href="https://yourdomain.com/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Private File Metadata Scrubber — Remove EXIF, GPS, PDF & DOCX Metadata" />
+  <meta property="og:description" content="Clean photos, PDFs, and Office documents in your browser. No upload required for supported formats. Free, private, and fast." />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:site_name" content="MetaShield" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Private File Metadata Scrubber" />
+  <meta name="twitter:description" content="Remove hidden metadata from photos, PDFs, and Word documents in your browser. No upload required for supported formats." />
+
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Cpath d='M50 16c-12 8-24 10-30 10v24c0 18 12 28 30 34 18-6 30-16 30-34V26c-6 0-18-2-30-10z' fill='%2322c55e'/%3E%3Cpath d='M36 52l10 10 18-20' stroke='%230f172a' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://yourdomain.com/#organization",
+        "name": "MetaShield",
+        "url": "https://yourdomain.com/"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://yourdomain.com/#website",
+        "url": "https://yourdomain.com/",
+        "name": "MetaShield",
+        "publisher": { "@id": "https://yourdomain.com/#organization" }
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://yourdomain.com/#app",
+        "name": "Private File Metadata Scrubber",
+        "url": "https://yourdomain.com/",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Web",
+        "browserRequirements": "Requires a modern browser with JavaScript enabled.",
+        "publisher": { "@id": "https://yourdomain.com/#organization" },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Remove EXIF metadata from JPG photos",
+          "Remove GPS location from photos",
+          "Strip PDF document metadata",
+          "Clean DOCX, XLSX, and PPTX properties",
+          "Browser-based processing for supported formats",
+          "Before and after metadata audit report"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Does this tool upload my file to a server?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "For supported workflows, the file is processed locally in your browser. The file content is not uploaded to a server by default. Some external JavaScript libraries may be loaded from a CDN, but your document or image content stays in the browser."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does removing EXIF remove GPS location data?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Usually yes, if the photo contains GPS EXIF data. The tool shows which location-related fields were detected and marks them as removed after local cleaning for supported image formats."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Will removing metadata reduce image quality?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Metadata removal does not intentionally change visible pixels. However, browser-based image cleaning may re-encode the image, which can slightly change file size, compression, or color profile. Always keep a backup of important original files."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I remove metadata from PDF files?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, the tool can detect and attempt to remove common PDF document properties such as title, author, subject, keywords, creator, producer, and dates. Some advanced PDF metadata, XMP data, attachments, annotations, or digital signatures may require professional sanitization."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I clean Word, Excel, and PowerPoint files?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, for OOXML files such as DOCX, XLSX, and PPTX, the tool can clean common document properties stored in docProps/core.xml and docProps/app.xml. Comments, tracked changes, revision history, macros, and embedded objects may not be fully removed in this MVP."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is metadata removal a guarantee of anonymity?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Removing metadata reduces privacy risk, but it does not guarantee complete anonymity. File names, visible content, embedded text, account metadata, upload platforms, and other artifacts may still reveal information."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0f172a;
+      --accent: #22c55e;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a { color: #1d4ed8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header.site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.86);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 68px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .brand svg { width: 28px; height: 28px; }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    main { padding: 28px 0 64px; }
+
+    .hero {
+      padding: 42px 0 18px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.3rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.4rem, 2.4vw, 2rem);
+      letter-spacing: -0.02em;
+    }
+
+    h3 { margin: 0 0 10px; font-size: 1.08rem; }
+
+    p.lede {
+      font-size: 1.08rem;
+      color: var(--muted);
+      margin: 0 0 18px;
+      max-width: 62ch;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .badge.green { border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.08); color: #15803d; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .tool-card { padding: 20px; }
+
+    .dropzone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 16px;
+      padding: 28px 18px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: 0.2s ease;
+      outline: none;
+    }
+
+    .dropzone:hover,
+    .dropzone:focus,
+    .dropzone.drag {
+      border-color: var(--accent);
+      background: rgba(34,197,94,0.06);
+    }
+
+    .dropzone strong { display: block; font-size: 1.05rem; margin-bottom: 6px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; }
+
+    .status {
+      margin: 14px 0 0;
+      min-height: 24px;
+      font-weight: 650;
+      color: var(--muted);
+    }
+
+    .status.error { color: var(--danger); }
+    .status.success { color: #15803d; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 11px 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    button:hover:not(:disabled) { transform: translateY(-1px); border-color: #94a3b8; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    button.primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .preview {
+      margin-top: 16px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 12px 0;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th { color: var(--muted); font-weight: 700; }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .pill.location { background: rgba(220,38,38,0.1); color: #b91c1c; }
+    .pill.camera { background: rgba(37,99,235,0.1); color: #1d4ed8; }
+    .pill.date { background: rgba(217,119,6,0.12); color: #b45309; }
+    .pill.identity { background: rgba(126,34,206,0.1); color: #7e22ce; }
+    .pill.software { background: rgba(15,118,110,0.1); color: #0f766e; }
+    .pill.document { background: rgba(71,85,105,0.12); color: #334155; }
+
+    .notice {
+      border-left: 4px solid var(--accent);
+      background: rgba(34,197,94,0.08);
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+
+    .warning-box {
+      border-left: 4px solid var(--warning);
+      background: rgba(217,119,6,0.08);
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+
+    section.block {
+      margin-top: 34px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    ul.tight, ol.tight {
+      margin: 10px 0 0 20px;
+      padding: 0;
+      color: var(--muted);
+    }
+
+    ul.tight li, ol.tight li { margin: 7px 0; }
+
+    details {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: var(--surface);
+      margin-bottom: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    details p { margin: 10px 0 0; color: var(--muted); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0 40px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .nav { flex-direction: column; align-items: flex-start; padding: 12px 0; }
+      .nav-links { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="MetaShield home">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <rect width="100" height="100" rx="22" fill="#0f172a"></rect>
+          <path d="M50 16c-12 8-24 10-30 10v24c0 18 12 28 30 34 18-6 30-16 30-34V26c-6 0-18-2-30-10z" fill="#22c55e"></path>
+          <path d="M36 52l10 10 18-20" stroke="#0f172a" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        MetaShield
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#tool">Tool</a>
+        <a href="#formats">Formats</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#limitations">Limitations</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top" class="container">
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Remove Hidden Metadata Before You Share Your Files</h1>
+          <p class="lede">
+            Clean photos, PDFs, and Word documents in your browser. No upload required for supported formats.
+            Get a clear before/after metadata report before downloading.
+          </p>
+
+          <div class="badges" aria-label="Trust badges">
+            <span class="badge green">Browser-based when supported</span>
+            <span class="badge">No account required</span>
+            <span class="badge">No file retention for local processing</span>
+            <span class="badge">Audit report included</span>
+          </div>
+
+          <div class="notice">
+            <strong>Direct answer:</strong> This tool detects and helps remove common hidden metadata such as GPS location, camera details, author names, company names, document dates, and Office/PDF properties. Supported files can be processed locally in your browser, reducing the risk of sending private files to external servers.
+          </div>
+        </div>
+
+        <div class="card tool-card" id="tool">
+          <h2>File Metadata Scrubber</h2>
+          <p class="muted small">Add a file to scan detected metadata. Cleaning is available for supported formats.</p>
+
+          <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Select or drop a file">
+            <strong>Drag and drop a file here</strong>
+            <span class="muted">or click to choose JPG, PNG, WebP, TIFF, PDF, DOCX, XLSX, PPTX</span>
+            <input id="fileInput" type="file" class="sr-only" accept=".jpg,.jpeg,.png,.webp,.tif,.tiff,.pdf,.docx,.xlsx,.pptx" />
+          </div>
+
+          <p id="status" class="status" aria-live="polite">Ready. Add a file to scan locally.</p>
+
+          <div id="preview" class="preview" hidden></div>
+
+          <div id="actions" class="actions" hidden>
+            <button id="cleanBtn" class="primary" disabled>Clean metadata in browser</button>
+            <button id="downloadFileBtn" disabled>Download cleaned file</button>
+            <button id="downloadReportBtn" disabled>Download audit report JSON</button>
+          </div>
+
+          <p class="muted small">
+            Privacy note: File contents are not uploaded by default. External JS libraries may be loaded from CDN for parsing and cleaning.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block grid-2">
+      <div class="card">
+        <h2>What Metadata Could Be Leaking?</h2>
+        <ul class="tight">
+          <li>GPS latitude and longitude from photos</li>
+          <li>Camera make, model, lens, and exposure details</li>
+          <li>Date and time the file was created or modified</li>
+          <li>Author name, company name, and manager fields in Office files</li>
+          <li>PDF title, subject, keywords, creator, and producer metadata</li>
+          <li>Embedded thumbnails and software traces</li>
+          <li>Custom document properties and revision metadata where detectable</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>How It Works</h2>
+        <ol class="tight">
+          <li>Add your file to the dropzone.</li>
+          <li>The tool scans common metadata fields locally in your browser.</li>
+          <li>Review the detected metadata table.</li>
+          <li>Click clean for supported file types.</li>
+          <li>Download the cleaned file and JSON audit report.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="block card" id="formats">
+      <h2>Supported Formats and Practical Limits</h2>
+      <table aria-label="Supported formats">
+        <thead>
+          <tr>
+            <th>Format</th>
+            <th>Detection</th>
+            <th>Local cleaning</th>
+            <th>Important notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>JPG / JPEG</td>
+            <td>Yes</td>
+            <td>Yes</td>
+            <td>Re-encoding removes most EXIF/GPS data but may change compression or color profile.</td>
+          </tr>
+          <tr>
+            <td>PNG / WebP</td>
+            <td>Yes</td>
+            <td>Yes</td>
+            <td>Canvas re-export can strip ancillary metadata. Critical visual data is preserved.</td>
+          </tr>
+          <tr>
+            <td>TIFF</td>
+            <td>Partial</td>
+            <td>Not yet</td>
+            <td>TIFF structures are complex. Detection may work, but safe browser cleaning is limited.</td>
+          </tr>
+          <tr>
+            <td>PDF</td>
+            <td>Yes</td>
+            <td>Yes, common properties</td>
+            <td>XMP, attachments, annotations, digital signatures, and PDF/A compliance may need professional tools.</td>
+          </tr>
+          <tr>
+            <td>DOCX / XLSX / PPTX</td>
+            <td>Yes</td>
+            <td>Yes, OOXML properties</td>
+            <td>Comments, tracked changes, macros, embedded objects, and deep revision history may remain.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="block grid-2" id="privacy">
+      <div class="card">
+        <h2>No-Upload Promise</h2>
+        <p>
+          For supported workflows, your file is read and processed inside your browser. The tool does not send file contents to a server by default.
+        </p>
+        <ul class="tight">
+          <li>No account required for basic use.</li>
+          <li>No server-side file retention for local processing.</li>
+          <li>No training on user files.</li>
+          <li>Audit report is generated locally and downloaded by you.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Security and Transparency</h2>
+        <p>
+          This is a privacy-focused MVP. It reduces metadata leakage risk, but it is not a guarantee of complete anonymity or forensic-level sanitization.
+        </p>
+        <ul class="tight">
+          <li>Validate important files with ExifTool or a professional auditor.</li>
+          <li>Keep backups before cleaning originals.</li>
+          <li>For legal, journalistic, or enterprise use, combine this tool with policy and verification.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="block card" id="limitations">
+      <h2>Honest Limitations</h2>
+      <div class="warning-box">
+        <ul class="tight">
+          <li>Metadata removal does not make a file 100% anonymous.</li>
+          <li>File names, visible content, upload platform metadata, and account data can still reveal identity.</li>
+          <li>Some proprietary camera MakerNotes, embedded objects, or complex PDF structures may not be fully removable in the browser.</li>
+          <li>Digital signatures and PDF/A compliance may be affected by PDF cleaning.</li>
+          <li>Deep Office cleaning may affect collaboration history, comments, tracked changes, or macros.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="block" id="faq">
+      <h2>Frequently Asked Questions</h2>
+
+      <details open>
+        <summary>Does this tool upload my file to a server?</summary>
+        <p>For supported workflows, the file is processed locally in your browser. The file content is not uploaded to a server by default. External JavaScript libraries may be loaded from a CDN, but your document or image content stays in the browser.</p>
+      </details>
+
+      <details>
+        <summary>Does removing EXIF remove GPS location data?</summary>
+        <p>Usually yes, if the photo contains GPS EXIF data. The tool shows which location-related fields were detected and marks them as removed after local cleaning for supported image formats.</p>
+      </details>
+
+      <details>
+        <summary>Will removing metadata reduce image quality?</summary>
+        <p>Metadata removal does not intentionally change visible pixels. However, browser-based image cleaning may re-encode the image, which can slightly change file size, compression, or color profile. Always keep a backup of important original files.</p>
+      </details>
+
+      <details>
+        <summary>Can I remove metadata from PDF files?</summary>
+        <p>Yes, the tool can detect and attempt to remove common PDF document properties such as title, author, subject, keywords, creator, producer, and dates. Some advanced PDF metadata, XMP data, attachments, annotations, or digital signatures may require professional sanitization.</p>
+      </details>
+
+      <details>
+        <summary>Can I clean Word, Excel, and PowerPoint files?</summary>
+        <p>Yes, for OOXML files such as DOCX, XLSX, and PPTX, the tool can clean common document properties stored in docProps/core.xml and docProps/app.xml. Comments, tracked changes, revision history, macros, and embedded objects may not be fully removed in this MVP.</p>
+      </details>
+
+      <details>
+        <summary>Is metadata removal a guarantee of anonymity?</summary>
+        <p>No. Removing metadata reduces privacy risk, but it does not guarantee complete anonymity. File names, visible content, embedded text, account metadata, upload platforms, and other artifacts may still reveal information.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div>
+      <strong>MetaShield</strong> — Privacy-first file metadata scrubber MVP.
+    </div>
+    <div class="footer-links">
+      <a href="#privacy">Privacy</a>
+      <a href="#limitations">Limitations</a>
+      <a href="#faq">FAQ</a>
+      <a href="mailto:support@yourdomain.com">Contact</a>
+    </div>
+    <p class="small muted">
+      Replace <code>https://yourdomain.com</code> and <code>support@yourdomain.com</code> with your real domain and email before deploying.
+    </p>
+  </footer>
+
+  <!-- External parsing libraries. For maximum privacy, self-host these files and update src attributes. -->
+  <script src="https://unpkg.com/exifreader@4/dist/exif-reader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+  <script>
+    (() => {
+      const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+
+      const els = {
+        dropzone: document.getElementById('dropzone'),
+        fileInput: document.getElementById('fileInput'),
+        status: document.getElementById('status'),
+        preview: document.getElementById('preview'),
+        actions: document.getElementById('actions'),
+        cleanBtn: document.getElementById('cleanBtn'),
+        downloadFileBtn: document.getElementById('downloadFileBtn'),
+        downloadReportBtn: document.getElementById('downloadReportBtn'),
+      };
+
+      const state = {
+        file: null,
+        scan: null,
+        clean: null,
+      };
+
+      const coreMap = {
+        'dc:creator': 'Author',
+        'cp:lastModifiedBy': 'Last modified by',
+        'dc:title': 'Title',
+        'dc:subject': 'Subject',
+        'cp:keywords': 'Keywords',
+        'dc:description': 'Description',
+        'cp:category': 'Category',
+        'cp:comments': 'Comments',
+      };
+
+      const dateMap = {
+        'dcterms:created': 'Created date',
+        'dcterms:modified': 'Modified date',
+      };
+
+      const appMap = {
+        Company: 'Company',
+        Manager: 'Manager',
+        Template: 'Template',
+        Application: 'Application',
+        DocSecurity: 'Doc security',
+        ScaleCrop: 'Scale crop',
+        LinksUpToDate: 'Links up to date',
+        SharedDoc: 'Shared doc',
+        HyperlinksChanged: 'Hyperlinks changed',
+        AppVersion: 'App version',
+        TotalTime: 'Total editing time',
+        Revision: 'Revision',
+      };
+
+      function setStatus(message, type = '') {
+        els.status.textContent = message;
+        els.status.className = `status ${type}`.trim();
+      }
+
+      function formatBytes(bytes) {
+        if (!Number.isFinite(bytes)) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let i = 0;
+        let value = bytes;
+        while (value >= 1024 && i < units.length - 1) {
+          value /= 1024;
+          i++;
+        }
+        return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+      }
+
+      function getExtension(name) {
+        const match = /\.([0-9a-z]+)(?:[\?#]|$)/i.exec(name || '');
+        return match ? match[1].toLowerCase() : '';
+      }
+
+      function getFileKind(ext) {
+        if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tif', 'tiff'].includes(ext)) return 'image';
+        if (ext === 'pdf') return 'pdf';
+        if (['docx', 'xlsx', 'pptx'].includes(ext)) return 'office';
+        return 'unsupported';
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (char) => {
+          return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+          }[char];
+        });
+      }
+
+      function humanize(key) {
+        return String(key)
+          .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+          .replace(/[_-]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      function errorMessage(error) {
+        if (!error) return 'Unknown error';
+        if (typeof error === 'string') return error;
+        if (error instanceof Error) return error.message;
+        try {
+          return JSON.stringify(error);
+        } catch {
+          return String(error);
+        }
+      }
+
+      function exifValueToString(value) {
+        if (value === null || value === undefined) return '';
+        if (typeof value === 'string') return value;
+        if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+        if (value instanceof ArrayBuffer) return `[binary ${value.byteLength} bytes]`;
+        if (value instanceof Uint8Array) return `[binary ${value.byteLength} bytes]`;
+        if (Array.isArray(value)) {
+          return value.map(exifValueToString).filter(Boolean).join(', ');
+        }
+        if (typeof value === 'object') {
+          if ('description' in value && typeof value.description === 'string') return value.description;
+          if ('value' in value) return exifValueToString(value.value);
+          try {
+            const json = JSON.stringify(value);
+            return json.length > 180 ? json.slice(0, 180) + '…' : json;
+          } catch {
+            return '[object]';
+          }
+        }
+        return String(value);
+      }
+
+      function pushDetected(base, field, value, category) {
+        const stringValue = exifValueToString(value).trim();
+        if (!stringValue) return;
+        if (base.detected.some((item) => item.field === field && item.value === stringValue)) return;
+        base.detected.push({ field, value: stringValue, category });
+      }
+
+      function escapeRegExp(value) {
+        return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      function tagRegex(tag) {
+        const escaped = escapeRegExp(tag);
+        return new RegExp(`<${escaped}(?:\\s[^>]*)?/>|<${escaped}(?:\\s[^>]*)?>[\\s\\S]*?</${escaped}>`, 'gi');
+      }
+
+      function getTagValue(xml, tag) {
+        const escaped = escapeRegExp(tag);
+        const regex = new RegExp(`<${escaped}(?:\\s[^>]*)?>([\\s\\S]*?)</${escaped}>`, 'i');
+        const match = xml.match(regex);
+        return match ? match[1].trim() : '';
+      }
+
+      function replaceTagWithEmpty(xml, tag) {
+        return xml.replace(tagRegex(tag), `<${tag}></${tag}>`);
+      }
+
+      function removeTag(xml, tag) {
+        return xml.replace(tagRegex(tag), '');
+      }
+
+      function officeMime(ext) {
+        if (ext === 'xlsx') return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        if (ext === 'pptx') return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      }
+
+      function cleanFileName(name, ext) {
+        const dotIndex = name.lastIndexOf('.');
+        const base = dotIndex > 0 ? name.slice(0, dotIndex) : name;
+        return `${base}-cleaned.${ext}`;
+      }
+
+      async function scanImage(file, base, ext) {
+        const EXIFLib = window.EXIF || window.ExifReader;
+        if (!EXIFLib) {
+          base.warnings.push('EXIF reader library did not load. Check your connection or self-host the library.');
+          return base;
+        }
+
+        try {
+          const buffer = await file.arrayBuffer();
+          const tags = await EXIFLib.load(buffer);
+
+          for (const [key, value] of Object.entries(tags)) {
+            if (key === 'Thumbnail' || key === 'ThumbnailImage') {
+              pushDetected(base, 'Embedded thumbnail', 'present', 'image');
+              continue;
+            }
+
+            let category = 'general';
+            if (/gps|latitude|longitude|altitude|position/i.test(key)) category = 'location';
+            else if (/camera|make|model|lens|exposure|fnumber|shutter|iso|flash|whitebalance|focal/i.test(key)) category = 'camera';
+            else if (/date|time/i.test(key)) category = 'date';
+            else if (/artist|copyright|owner|serial|device|author/i.test(key)) category = 'identity';
+            else if (/software|encoder|application/i.test(key)) category = 'software';
+
+            pushDetected(base, humanize(key), value, category);
+          }
+        } catch (error) {
+          base.warnings.push('Image metadata scan failed: ' + errorMessage(error));
+        }
+
+        base.canClean = ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
+        if (!base.canClean) {
+          base.warnings.push('Local cleaning is currently supported for JPG, JPEG, PNG, and WebP images.');
+        }
+
+        return base;
+      }
+
+      async function scanPdf(file, base) {
+        if (!window.PDFLib) {
+          base.warnings.push('PDF library did not load. Check your connection or self-host the library.');
+          return base;
+        }
+
+        try {
+          const { PDFDocument } = window.PDFLib;
+          const buffer = await file.arrayBuffer();
+          const pdf = await PDFDocument.load(buffer, { updateMetadata: false, ignoreEncryption: true });
+
+          pushDetected(base, 'Title', pdf.getTitle(), 'document');
+          pushDetected(base, 'Author', pdf.getAuthor(), 'identity');
+          pushDetected(base, 'Subject', pdf.getSubject(), 'document');
+          pushDetected(base, 'Keywords', pdf.getKeywords(), 'document');
+          pushDetected(base, 'Creator', pdf.getCreator(), 'software');
+          pushDetected(base, 'Producer', pdf.getProducer(), 'software');
+
+          const created = pdf.getCreationDate();
+          if (created) pushDetected(base, 'Creation date', created.toISOString ? created.toISOString() : String(created), 'date');
+
+          const modified = pdf.getModificationDate();
+          if (modified) pushDetected(base, 'Modification date', modified.toISOString ? modified.toISOString() : String(modified), 'date');
+
+          base.canClean = true;
+          base.warnings.push('Some advanced PDF metadata, XMP data, attachments, annotations, or digital signatures may not be fully removed in this browser MVP.');
+        } catch (error) {
+          base.warnings.push('PDF scan failed: ' + errorMessage(error));
+        }
+
+        return base;
+      }
+
+      async function scanOffice(file, base) {
+        if (!window.JSZip) {
+          base.warnings.push('JSZip library did not load. Check your connection or self-host the library.');
+          return base;
+        }
+
+        try {
+          const buffer = await file.arrayBuffer();
+          const zip = await window.JSZip.loadAsync(buffer);
+
+          const coreFile = zip.file('docProps/core.xml');
+          if (coreFile) {
+            const xml = await coreFile.async('string');
+
+            for (const [tag, label] of Object.entries(coreMap)) {
+              const value = getTagValue(xml, tag);
+              if (value) pushDetected(base, label, value, tag.includes('creator') || tag.includes('lastModifiedBy') ? 'identity' : 'document');
+            }
+
+            for (const [tag, label] of Object.entries(dateMap)) {
+              const value = getTagValue(xml, tag);
+              if (value) pushDetected(base, label, value, 'date');
+            }
+          }
+
+          const appFile = zip.file('docProps/app.xml');
+          if (appFile) {
+            const xml = await appFile.async('string');
+            for (const [tag, label] of Object.entries(appMap)) {
+              const value = getTagValue(xml, tag);
+              if (value) pushDetected(base, label, value, tag === 'Company' || tag === 'Manager' ? 'identity' : 'document');
+            }
+          }
+
+          if (zip.file('docProps/custom.xml')) {
+            pushDetected(base, 'Custom properties', 'present', 'document');
+          }
+
+          Object.keys(zip.files).forEach((path) => {
+            const entry = zip.files[path];
+            if (!entry.dir && /comments?\.xml$/i.test(path)) {
+              pushDetected(base, 'Comments part', path, 'document');
+            }
+          });
+
+          base.canClean = true;
+          base.warnings.push('Visible document content is preserved. Comments, tracked changes, revision history, macros, and embedded objects may not be fully removed in this MVP.');
+        } catch (error) {
+          base.warnings.push('Office file scan failed: ' + errorMessage(error));
+        }
+
+        return base;
+      }
+
+      async function scanFile(file) {
+        const ext = getExtension(file.name);
+        const kind = getFileKind(ext);
+
+        const base = {
+          fileName: file.name,
+          fileType: file.type || ext,
+          kind,
+          size: file.size,
+          detected: [],
+          warnings: [],
+          canClean: false,
+        };
+
+        if (file.size > MAX_FILE_SIZE) {
+          base.warnings.push(`File is larger than the current ${formatBytes(MAX_FILE_SIZE)} browser limit.`);
+          return base;
+        }
+
+        if (kind === 'image') return await scanImage(file, base, ext);
+        if (kind === 'pdf') return await scanPdf(file, base);
+        if (kind === 'office') return await scanOffice(file, base);
+
+        base.warnings.push('Unsupported file type for this MVP.');
+        return base;
+      }
+
+      async function loadImageBitmap(file) {
+        if ('createImageBitmap' in window) {
+          try {
+            return await createImageBitmap(file, { imageOrientation: 'from-image' });
+          } catch {
+            // Fallback below.
+          }
+        }
+
+        return await new Promise((resolve, reject) => {
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(img);
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error('Image could not be decoded.'));
+          };
+          img.src = url;
+        });
+      }
+
+      async function cleanImage(file, scan) {
+        const ext = getExtension(file.name);
+        const outputType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+
+        const source = await loadImageBitmap(file);
+        const width = source.width || source.naturalWidth;
+        const height = source.height || source.naturalHeight;
+
+        if (!width || !height) throw new Error('Could not read image dimensions.');
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas 2D is not available in this browser.');
+
+        ctx.drawImage(source, 0, 0);
+        if (typeof source.close === 'function') source.close();
+
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob((result) => {
+            if (result) resolve(result);
+            else reject(new Error('Image export failed.'));
+          }, outputType, 0.92);
+        });
+
+        const removed = scan.detected.map((item) => ({ ...item, action: 'removed' }));
+        const preserved = [
+          { field: 'Visible pixels', value: 'preserved', category: 'image' },
+          { field: 'Dimensions', value: `${width}×${height}`, category: 'image' },
+        ];
+
+        const warnings = [
+          'Image was re-encoded locally. This removes most metadata but can change file size, color profile, or compression.',
+          'Always keep a backup of important original files.',
+        ];
+
+        return makeClean(file, scan, blob, outputType, removed, preserved, warnings);
+      }
+
+      async function cleanPdf(file, scan) {
+        if (!window.PDFLib) throw new Error('PDF library is not available.');
+
+        const { PDFDocument } = window.PDFLib;
+        const buffer = await file.arrayBuffer();
+        const sourcePdf = await PDFDocument.load(buffer, { updateMetadata: false, ignoreEncryption: true });
+        const outputPdf = await PDFDocument.create();
+
+        const pageIndices = sourcePdf.getPageIndices();
+        const copiedPages = await outputPdf.copyPages(sourcePdf, pageIndices);
+        copiedPages.forEach((page) => outputPdf.addPage(page));
+
+        try {
+          outputPdf.setTitle('');
+          outputPdf.setAuthor('');
+          outputPdf.setSubject('');
+          outputPdf.setKeywords([]);
+          outputPdf.setCreator('');
+          outputPdf.setProducer('');
+        } catch {
+          // Some setters may vary by pdf-lib version.
+        }
+
+        const bytes = await outputPdf.save();
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+
+        const removed = scan.detected.map((item) => ({ ...item, action: 'removed-or-rebuilt' }));
+        const preserved = [
+          { field: 'Pages', value: String(copiedPages.length), category: 'document' },
+          { field: 'Visible page content', value: 'intended to be preserved', category: 'document' },
+        ];
+
+        const warnings = [
+          'PDF was rebuilt in the browser. Digital signatures, PDF/A compliance, attachments, annotations, and some XMP metadata may be affected or not fully removed.',
+          'Verify important legal or archival PDFs with a professional sanitizer.',
+        ];
+
+        return makeClean(file, scan, blob, 'application/pdf', removed, preserved, warnings);
+      }
+
+      async function cleanOffice(file, scan) {
+        if (!window.JSZip) throw new Error('JSZip library is not available.');
+
+        const buffer = await file.arrayBuffer();
+        const zip = await window.JSZip.loadAsync(buffer);
+        const removed = [];
+
+        const coreFile = zip.file('docProps/core.xml');
+        if (coreFile) {
+          let xml = await coreFile.async('string');
+
+          for (const [tag, label] of Object.entries(coreMap)) {
+            const value = getTagValue(xml, tag);
+            if (value) {
+              removed.push({ field: label, value, category: tag.includes('creator') || tag.includes('lastModifiedBy') ? 'identity' : 'document', action: 'removed' });
+              xml = replaceTagWithEmpty(xml, tag);
+            }
+          }
+
+          for (const [tag, label] of Object.entries(dateMap)) {
+            const value = getTagValue(xml, tag);
+            if (value) {
+              removed.push({ field: label, value, category: 'date', action: 'removed' });
+              xml = removeTag(xml, tag);
+            }
+          }
+
+          zip.file('docProps/core.xml', xml);
+        }
+
+        const appFile = zip.file('docProps/app.xml');
+        if (appFile) {
+          let xml = await appFile.async('string');
+
+          for (const [tag, label] of Object.entries(appMap)) {
+            const value = getTagValue(xml, tag);
+            if (value) {
+              removed.push({ field: label, value, category: tag === 'Company' || tag === 'Manager' ? 'identity' : 'document', action: 'removed' });
+              xml = removeTag(xml, tag);
+            }
+          }
+
+          zip.file('docProps/app.xml', xml);
+        }
+
+        if (zip.file('docProps/custom.xml')) {
+          zip.remove('docProps/custom.xml');
+          removed.push({ field: 'Custom properties', value: 'part removed', category: 'document', action: 'removed' });
+        }
+
+        const ext = getExtension(file.name);
+        const mime = file.type || officeMime(ext);
+        const blob = await zip.generateAsync({ type: 'blob', mimeType: mime });
+
+        const preserved = [
+          { field: 'Visible document content', value: 'preserved', category: 'document' },
+        ];
+
+        const warnings = [
+          'OOXML properties were cleaned. Comments, tracked changes, revision history, embedded objects, and macros may remain depending on file structure.',
+          'For legal or high-risk documents, use a dedicated enterprise sanitizer.',
+        ];
+
+        return makeClean(file, scan, blob, mime, removed, preserved, warnings);
+      }
+
+      function makeClean(file, scan, blob, mime, removed, preserved, warnings) {
+        const extOut =
+          mime === 'image/png' ? 'png' :
+          mime === 'image/webp' ? 'webp' :
+          mime === 'application/pdf' ? 'pdf' :
+          getExtension(file.name);
+
+        const fileName = cleanFileName(file.name, extOut);
+
+        const report = {
+          generatedAt: new Date().toISOString(),
+          toolVersion: '0.1.0-single-file',
+          privacyMode: 'local-browser-no-upload',
+          file: {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            sizeHuman: formatBytes(file.size),
+          },
+          detected: scan.detected,
+          removed,
+          preserved,
+          warnings,
+        };
+
+        return { fileName, blob, report };
+      }
+
+      async function cleanFile(file, scan) {
+        if (!scan.canClean) throw new Error('This file cannot be cleaned locally yet.');
+        if (scan.kind === 'image') return await cleanImage(file, scan);
+        if (scan.kind === 'pdf') return await cleanPdf(file, scan);
+        if (scan.kind === 'office') return await cleanOffice(file, scan);
+        throw new Error('Unsupported file type.');
+      }
+
+      function renderScan(scan) {
+        const count = scan.detected.length;
+        let html = `<h3>Detected metadata: ${count}</h3>`;
+
+        if (count === 0) {
+          html += `<p class="muted">No common metadata fields were detected in this file.</p>`;
+        } else {
+          html += `<table><thead><tr><th>Field</th><th>Value</th><th>Category</th></tr></thead><tbody>`;
+          scan.detected.slice(0, 120).forEach((item) => {
+            html += `
+              <tr>
+                <td>${escapeHtml(item.field)}</td>
+                <td>${escapeHtml(item.value)}</td>
+                <td><span class="pill ${escapeHtml(item.category)}">${escapeHtml(item.category)}</span></td>
+              </tr>
+            `;
+          });
+          html += `</tbody></table>`;
+          if (count > 120) html += `<p class="muted small">Showing first 120 fields. Download report after cleaning for full JSON.</p>`;
+        }
+
+        if (scan.warnings.length) {
+          html += `<div class="warning-box"><strong>Warnings</strong><ul class="tight">`;
+          scan.warnings.forEach((warning) => {
+            html += `<li>${escapeHtml(warning)}</li>`;
+          });
+          html += `</ul></div>`;
+        }
+
+        els.preview.innerHTML = html;
+        els.preview.hidden = false;
+      }
+
+      function renderClean(clean) {
+        const removedCount = clean.report.removed.length;
+        let html = `<h3>Clean report</h3>`;
+        html += `<p><span class="pill document">${removedCount} fields marked removed/rebuilt</span></p>`;
+
+        if (clean.report.warnings.length) {
+          html += `<div class="warning-box"><strong>Post-clean warnings</strong><ul class="tight">`;
+          clean.report.warnings.forEach((warning) => {
+            html += `<li>${escapeHtml(warning)}</li>`;
+          });
+          html += `</ul></div>`;
+        }
+
+        html += `<p class="muted small">File name: ${escapeHtml(clean.fileName)} • Size: ${formatBytes(clean.blob.size)}</p>`;
+
+        els.preview.insertAdjacentHTML('beforeend', html);
+        els.downloadFileBtn.disabled = false;
+        els.downloadReportBtn.disabled = false;
+      }
+
+      function resetClean() {
+        state.clean = null;
+        els.downloadFileBtn.disabled = true;
+        els.downloadReportBtn.disabled = true;
+      }
+
+      function downloadBlob(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      }
+
+      async function handleFile(file) {
+        resetClean();
+        state.file = file;
+        state.scan = null;
+
+        els.preview.hidden = true;
+        els.preview.innerHTML = '';
+        els.actions.hidden = false;
+        els.cleanBtn.disabled = true;
+
+        if (file.size > MAX_FILE_SIZE) {
+          setStatus(`File is too large. Current limit is ${formatBytes(MAX_FILE_SIZE)}.`, 'error');
+          return;
+        }
+
+        setStatus('Scanning metadata locally...');
+
+        try {
+          const scan = await scanFile(file);
+          state.scan = scan;
+          renderScan(scan);
+
+          if (scan.canClean) {
+            els.cleanBtn.disabled = false;
+            setStatus('Metadata detected. Review and clean.', 'success');
+          } else {
+            setStatus('Scan complete. Cleaning is not supported for this file yet.', 'error');
+          }
+        } catch (error) {
+          setStatus('Scan failed: ' + errorMessage(error), 'error');
+        }
+      }
+
+      function bindEvents() {
+        els.dropzone.addEventListener('click', () => els.fileInput.click());
+
+        els.dropzone.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            els.fileInput.click();
+          }
+        });
+
+        ['dragenter', 'dragover'].forEach((eventName) => {
+          els.dropzone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            els.dropzone.classList.add('drag');
+          });
+        });
+
+        ['dragleave', 'drop'].forEach((eventName) => {
+          els.dropzone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            els.dropzone.classList.remove('drag');
+          });
+        });
+
+        els.dropzone.addEventListener('drop', (event) => {
+          const file = event.dataTransfer?.files?.[0];
+          if (file) handleFile(file);
+        });
+
+        els.fileInput.addEventListener('change', (event) => {
+          const file = event.target.files?.[0];
+          if (file) handleFile(file);
+        });
+
+        els.cleanBtn.addEventListener('click', async () => {
+          if (!state.file || !state.scan) return;
+
+          els.cleanBtn.disabled = true;
+          setStatus('Cleaning file in browser...');
+
+          try {
+            const clean = await cleanFile(state.file, state.scan);
+            state.clean = clean;
+            renderClean(clean);
+            setStatus('Clean complete. Download cleaned file and report.', 'success');
+          } catch (error) {
+            setStatus('Cleaning failed: ' + errorMessage(error), 'error');
+            els.cleanBtn.disabled = false;
+          }
+        });
+
+        els.downloadFileBtn.addEventListener('click', () => {
+          if (state.clean) downloadBlob(state.clean.blob, state.clean.fileName);
+        });
+
+        els.downloadReportBtn.addEventListener('click', () => {
+          if (!state.clean) return;
+          const json = JSON.stringify(state.clean.report, null, 2);
+          const blob = new Blob([json], { type: 'application/json' });
+          const reportName = state.clean.fileName.replace(/\.[^.]+$/, '') + '-metadata-report.json';
+          downloadBlob(blob, reportName);
+        });
+      }
+
+      function checkLibraries() {
+        const missing = [];
+        if (!(window.EXIF || window.ExifReader)) missing.push('EXIF reader');
+        if (!window.JSZip) missing.push('JSZip');
+        if (!window.PDFLib) missing.push('PDF-Lib');
+
+        if (missing.length) {
+          setStatus(`Some libraries did not load: ${missing.join(', ')}. Basic UI works, but scanning/cleaning may fail.`, 'error');
+        } else {
+          setStatus('Ready. Add a file to scan locally.');
+        }
+      }
+
+      bindEvents();
+      checkLibraries();
+    })();
+  </script>
+</body>
+</html>
